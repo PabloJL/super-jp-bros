@@ -42,8 +42,13 @@ function create() {
   this.anims.create({
     key: "mario-walk",
     frames: this.anims.generateFrameNumbers("mario", { start: 3, end: 1 }),
-    frameRate: 12,
+    frameRate: 14,
     repeat: -1,
+  });
+
+  this.anims.create({
+    key: "mario-idle",
+    frames: [{ key: "mario", frame: 0 }],
   });
 
   this.keys = this.input.keyboard.createCursorKeys();
@@ -58,7 +63,6 @@ function update() {
     this.mario.anims.play("mario-walk", true);
     this.mario.x += 2;
   } else {
-    this.mario.anims.stop();
-    this.mario.setFrame(0);
+    this.mario.anims.play("mario-idle", true);
   }
 }
