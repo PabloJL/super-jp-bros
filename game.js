@@ -74,6 +74,7 @@ function create() {
   this.coins = this.physics.add.staticGroup();
   this.coins.create(150, 150, "coin").anims.play("coin-idle", true);
   this.coins.create(160, 150, "coin").anims.play("coin-idle", true);
+  this.coins.create(170, 150, "coin").anims.play("coin-idle", true);
   this.physics.add.overlap(this.mario, this.coins, collectCoin, null, this);
 
   this.physics.world.setBounds(0, 0, 2000, config.height);
