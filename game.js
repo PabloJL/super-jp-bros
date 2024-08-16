@@ -117,6 +117,11 @@ function update() {
 function collectCoin(mario, coin) {
   coin.destroy();
   playAudio("coin-pickup", this, { volume: 0.1 });
+
+  this.add.text(coin.x, coin.y, 100, {
+    fontFamily: "pixel",
+    fontSize: config.width / 40,
+  });
 }
 
 function killMario(game) {
