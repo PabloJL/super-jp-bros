@@ -89,21 +89,6 @@ function create() {
   this.keys = this.input.keyboard.createCursorKeys();
 }
 
-function onHitEnemy(mario, enemy) {
-  if (mario.body.touching.down && enemy.body.touching.up) {
-    enemy.anims.play("goomba-hurt", true);
-    enemy.setVelocityX(0);
-    playAudio("goomba-stomp", this);
-    setTimeout(() => {
-      enemy.destroy();
-    }, 500);
-
-    mario.setVelocityY(-200);
-  } else {
-    killMario(this);
-  }
-}
-
 ///3. Bucle continuo
 function update() {
   const { mario } = this;
@@ -117,11 +102,46 @@ function update() {
 function collectCoin(mario, coin) {
   coin.destroy();
   playAudio("coin-pickup", this, { volume: 0.1 });
+  addToScore(100, coin, this);
+}
 
-  this.add.text(coin.x, coin.y, 100, {
+function addToScore(scoreToAdd, origin, game) {
+  const scoreText = game.add.text(origin.x, origin.y, scoreToAdd, {
     fontFamily: "pixel",
     fontSize: config.width / 40,
   });
+
+  game.tweens.add({
+    targets: scoreText,
+    duration: 500,
+    y: scoreText.y - 20,
+    onComplete: () => {
+      game.tweens.add({
+        targets: scoreText,
+        duration: 100,
+        alpha: 0,
+        onComplete: () => {
+          scoreText.destroy();
+        },
+      });
+    },
+  });
+}
+
+function onHitEnemy(mario, enemy) {
+  if (mario.body.touching.down && enemy.body.touching.up) {
+    enemy.anims.play("goomba-hurt", true);
+    enemy.setVelocityX(0);
+    playAudio("goomba-stomp", this);
+    addToScore(200, enemy, this);
+    setTimeout(() => {
+      enemy.destroy();
+    }, 500);
+
+    mario.setVelocityY(-200);
+  } else {
+    killMario(this);
+  }
 }
 
 function killMario(game) {
