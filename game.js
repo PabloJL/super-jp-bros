@@ -32,6 +32,8 @@ function preload() {
 
   this.load.image("floorbricks", "assets/scenery/overworld/floorbricks.png");
 
+  this.load.image("supermushroom", "assets/collectibles/super-mushroom.png");
+
   initSpritesheet(this);
   initAudio(this);
 }
@@ -71,11 +73,20 @@ function create() {
     .setGravityY(500);
   this.enemy.anims.play("goomba-walk", true);
 
-  this.coins = this.physics.add.staticGroup();
-  this.coins.create(150, 150, "coin").anims.play("coin-idle", true);
-  this.coins.create(160, 150, "coin").anims.play("coin-idle", true);
-  this.coins.create(170, 150, "coin").anims.play("coin-idle", true);
-  this.physics.add.overlap(this.mario, this.coins, collectCoin, null, this);
+  this.collectibles = this.physics.add.staticGroup();
+  this.collectibles.create(150, 150, "coin").anims.play("coin-idle", true);
+  this.collectibles.create(160, 150, "coin").anims.play("coin-idle", true);
+  this.collectibles.create(170, 150, "coin").anims.play("coin-idle", true);
+  this.collectibles
+    .create(200, config.height - 40, "supermushroom")
+    .anims.play("supermushroom-idle", true);
+  this.physics.add.overlap(
+    this.mario,
+    this.collectibles,
+    collectItem,
+    null,
+    this
+  );
 
   this.physics.world.setBounds(0, 0, 2000, config.height);
 
@@ -99,10 +110,40 @@ function update() {
   }
 }
 
-function collectCoin(mario, coin) {
-  coin.destroy();
-  playAudio("coin-pickup", this, { volume: 0.1 });
-  addToScore(100, coin, this);
+function collectItem(mario, item) {
+  const {
+    texture: { key },
+  } = item;
+  item.destroy();
+
+  if (key === "coin") {
+    playAudio("coin-pickup", this, { volume: 0.1 });
+    addToScore(100, item, this);
+  } else if (key === "supermushroom") {
+    this.physics.world.pause();
+    this.anims.pauseAll();
+
+    playAudio("powerup", this, { volume: 0.1 });
+
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      mario.anims.play(i % 2 === 0 ? "mario-grown-idle" : "mario-idle");
+    }, 100);
+
+    mario.isBlocked = true;
+    mario.isGrown = true;
+
+    setTimeout(() => {
+      mario.setDisplaySize(18, 32);
+      mario.body.setSize(18, 32);
+
+      this.anims.resumeAll();
+      mario.isBlocked = false;
+      clearInterval(interval);
+      this.physics.world.resume();
+    }, 1000);
+  }
 }
 
 function addToScore(scoreToAdd, origin, game) {
